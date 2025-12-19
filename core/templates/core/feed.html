@@ -1,0 +1,68 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Feed -->
+    <div class="col-lg-8">
+        <!-- Create Post Card -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Share a new moment</h6>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <textarea name="caption" class="form-control bg-light border-0" rows="2" placeholder="What is your pet up to?" required></textarea>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <input type="file" name="image" class="form-control form-control-sm w-auto" accept="image/*" required>
+                        <button type="submit" class="btn btn-primary px-4">Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Posts List -->
+        {% for post in posts %}
+        <div class="card mb-4 overflow-hidden">
+            <div class="card-header bg-white border-0 py-3">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center me-2" style="width:35px; height:35px;">
+                        {{ post.author.username|first|upper }}
+                    </div>
+                    <span class="fw-bold">@{{ post.author.username }}</span>
+                </div>
+            </div>
+            <img src="{{ post.image.url }}" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;">
+            <div class="card-body">
+                <p class="mb-1"><span class="fw-bold">@{{ post.author.username }}</span> {{ post.caption }}</p>
+                <small class="text-muted">{{ post.created_at|timesince }} ago</small>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5">
+            <p class="text-muted">No posts yet. Be the first to post!</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4 d-none d-lg-block">
+        <div class="card sticky-top" style="top: 90px;">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Your Pets</h6>
+                <ul class="list-unstyled">
+                    {% for pet in user_pets %}
+                    <li class="mb-2">
+                        <span class="me-2">🐶</span><strong>{{ pet.name }}</strong> 
+                        <span class="badge bg-light text-dark fw-normal">{{ pet.species }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="small text-muted mb-3">You haven't added any pets yet.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'create_pet' %}" class="btn btn-outline-primary btn-sm w-100">Add New Pet</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
