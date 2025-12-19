@@ -1,4 +1,5 @@
 import os
+import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -55,11 +56,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'petpool_project.wsgi.application'
 
-# --- DATABASE CONFIGURATION (Direct Fix - No dj_database_url) ---
-# This ignores the library entirely if the variable is empty to prevent the KeyError
-import dj_database_url
-db_from_env = dj_database_url.config(conn_max_age=600)
-
+# --- DATABASE CONFIGURATION ---
+# Default to SQLite, but update to Postgres if Render provides DATABASE_URL
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -67,17 +65,16 @@ DATABASES = {
     }
 }
 
-# If Render provides a database URL, use it; otherwise, stick to SQLite
-if db_from_env:
+# This check prevents the KeyError: '' that crashed the build earlier
+if os.environ.get('DATABASE_URL'):
+    db_from_env = dj_database_url.config(conn_max_age=600)
     DATABASES['default'].update(db_from_env)
-# ----------------------------------------------------------------
+# ------------------------------
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
 # Internationalization
@@ -85,6 +82,11 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
+
+# Authentication Redirects (Fixes the 404 errors in your logs)
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'feed'
+LOGOUT_REDIRECT_URL = 'login'
 
 # Static files (CSS, JavaScript)
 STATIC_URL = '/static/'
