@@ -9,7 +9,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-u9%b2mca0_)2#!)y^-+)^8yof()p90%oi_n00=&k5vq!ajcusa'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Set to False on Render, keep True for local testing
 DEBUG = True
 
 # Allows Render to host your site
@@ -23,12 +22,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core', # Your app
+    'core', # Your logic app
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # FOR STATIC FILES ON RENDER
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Critical for CSS on Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -49,7 +48,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.template.context_processors.media', # ADDED FOR IMAGES
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -57,13 +56,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'petpool_project.wsgi.application'
 
-# Database configuration for Render (PostgreSQL) and Local (SQLite)
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}',
-        conn_max_age=600
-    )
-}
+# --- DATABASE CONFIGURATION (The Fix) ---
+# This logic prevents the KeyError: '' by checking if the variable exists first.
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+# ----------------------------------------
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -84,7 +92,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files (Uploaded Images)
+# Media files (Uploaded Pet Images)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
