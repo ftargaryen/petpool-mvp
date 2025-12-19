@@ -1,5 +1,4 @@
 import os
-import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -56,22 +55,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'petpool_project.wsgi.application'
 
-# --- DATABASE CONFIGURATION (The Fix) ---
-# This logic prevents the KeyError: '' by checking if the variable exists first.
-DATABASE_URL = os.environ.get('DATABASE_URL')
+# --- DATABASE CONFIGURATION (Direct Fix - No dj_database_url) ---
+# This ignores the library entirely if the variable is empty to prevent the KeyError
+import dj_database_url
+db_from_env = dj_database_url.config(conn_max_age=600)
 
-if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
-# ----------------------------------------
+}
+
+# If Render provides a database URL, use it; otherwise, stick to SQLite
+if db_from_env:
+    DATABASES['default'].update(db_from_env)
+# ----------------------------------------------------------------
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
