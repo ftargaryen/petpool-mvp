@@ -1,68 +1,51 @@
-{% extends "core/base.html" %}
+{% extends 'core/base.html' %}
 
 {% block content %}
-<div class="row">
-    <!-- Main Feed -->
-    <div class="col-lg-8">
-        <!-- Create Post Card -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h6 class="fw-bold mb-3">Share a new moment</h6>
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <textarea name="caption" class="form-control bg-light border-0" rows="2" placeholder="What is your pet up to?" required></textarea>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <input type="file" name="image" class="form-control form-control-sm w-auto" accept="image/*" required>
-                        <button type="submit" class="btn btn-primary px-4">Post</button>
-                    </div>
-                </form>
-            </div>
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        
+        <div class="mb-4">
+            <form class="d-flex shadow-sm rounded-pill bg-white p-1 border" style="border-color: #ddd6fe !important;" method="GET" action="{% url 'feed' %}">
+                <input class="form-control border-0 rounded-pill ps-3" type="search" name="q" placeholder="Search pets or owners..." value="{{ search_query|default:'' }}">
+                <button class="btn btn-purple rounded-pill px-4" type="submit">Search</button>
+            </form>
         </div>
 
-        <!-- Posts List -->
+        <h3 class="fw-bold mb-4" style="color: #4c1d95;">Pet Community Feed</h3>
+
         {% for post in posts %}
-        <div class="card mb-4 overflow-hidden">
-            <div class="card-header bg-white border-0 py-3">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center me-2" style="width:35px; height:35px;">
+                    <div class="bg-purple text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; background-color: #7c3aed; font-size: 0.8rem;">
                         {{ post.author.username|first|upper }}
                     </div>
-                    <span class="fw-bold">@{{ post.author.username }}</span>
+                    <span class="fw-bold text-dark">@{{ post.author.username }}</span>
                 </div>
+                <span class="badge rounded-pill bg-light text-primary border border-primary small" style="color: #7c3aed !important; border-color: #7c3aed !important;">🐾 Pet Owner</span>
             </div>
-            <img src="{{ post.image.url }}" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;">
+
+            {% if post.image %}
+                <img src="{{ post.image.url }}" class="card-img-top" alt="Pet image" style="max-height: 500px; object-fit: cover;">
+            {% endif %}
+
             <div class="card-body">
-                <p class="mb-1"><span class="fw-bold">@{{ post.author.username }}</span> {{ post.caption }}</p>
-                <small class="text-muted">{{ post.created_at|timesince }} ago</small>
+                <div class="d-flex gap-3 mb-2">
+                    <button class="btn btn-link text-danger p-0 text-decoration-none"><i class="fa-regular fa-heart"></i> Like</button>
+                    <button class="btn btn-link text-secondary p-0 text-decoration-none"><i class="fa-regular fa-comment"></i> Comment</button>
+                </div>
+                
+                <p class="mb-1"><strong>{{ post.author.username }}</strong> {{ post.caption }}</p>
+                <p class="text-muted mb-0" style="font-size: 0.75rem;">{{ post.created_at|timesince }} ago</p>
             </div>
         </div>
         {% empty %}
-        <div class="text-center py-5">
-            <p class="text-muted">No posts yet. Be the first to post!</p>
+        <div class="card p-5 text-center shadow-sm">
+            <i class="fa-solid fa-magnifying-glass mb-3 text-muted" style="font-size: 2rem;"></i>
+            <h5 class="text-muted">No pets found.</h5>
+            <a href="{% url 'create_pet' %}" class="btn btn-purple mt-2">Add Your Pet</a>
         </div>
         {% endfor %}
-    </div>
-
-    <!-- Sidebar -->
-    <div class="col-lg-4 d-none d-lg-block">
-        <div class="card sticky-top" style="top: 90px;">
-            <div class="card-body">
-                <h6 class="fw-bold mb-3">Your Pets</h6>
-                <ul class="list-unstyled">
-                    {% for pet in user_pets %}
-                    <li class="mb-2">
-                        <span class="me-2">🐶</span><strong>{{ pet.name }}</strong> 
-                        <span class="badge bg-light text-dark fw-normal">{{ pet.species }}</span>
-                    </li>
-                    {% empty %}
-                    <li class="small text-muted mb-3">You haven't added any pets yet.</li>
-                    {% endfor %}
-                </ul>
-                <a href="{% url 'create_pet' %}" class="btn btn-outline-primary btn-sm w-100">Add New Pet</a>
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %}

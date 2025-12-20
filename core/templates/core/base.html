@@ -3,49 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetPool | Social for Pets</title>
-    <!-- Bootstrap 5 CSS -->
+    <title>PetPool MVP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f8f9fa; font-family: 'Inter', -apple-system, sans-serif; }
-        .navbar { background-color: #ffffff !important; border-bottom: 1px solid #dee2e6; }
-        .nav-link { color: #333 !important; font-weight: 500; }
-        .btn-primary { border-radius: 8px; font-weight: 600; }
-        .card { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        /* Modern Purple Theme */
+        body { 
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); 
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+        }
+        
+        /* Premium Navbar */
+        .navbar { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #ddd6fe; 
+            box-shadow: 0 4px 12px rgba(109, 40, 217, 0.05); 
+        }
+
+        .navbar-brand { font-size: 1.5rem; letter-spacing: -0.5px; }
+        
+        /* Purple Logo Icon */
+        .logo-icon { 
+            color: #7c3aed; 
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .brand-text-main { color: #1f2937; }
+        .brand-text-sub { color: #7c3aed; }
+
+        /* Purple Buttons */
+        .btn-purple { 
+            background-color: #7c3aed; 
+            color: white; 
+            border-radius: 25px; 
+            padding: 8px 24px; 
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .btn-purple:hover { 
+            background-color: #6d28d9; 
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-outline-purple {
+            color: #7c3aed;
+            border: 2px solid #7c3aed;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        .card { 
+            border-radius: 20px; 
+            border: 1px solid rgba(124, 58, 237, 0.1); 
+            background: white;
+        }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg sticky-top mb-4">
         <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="{% url 'feed' %}">🐾 PetPool</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'feed' %}">Feed</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'create_pet' %}">Add Pet</a></li>
-                        <li class="nav-item ms-lg-3">
-                            <form action="{% url 'logout' %}" method="post">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
-                            </form>
-                        </li>
-                    {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
-                        <li class="nav-item"><a class="btn btn-primary btn-sm ms-lg-2" href="{% url 'register' %}">Sign Up</a></li>
-                    {% endif %}
-                </ul>
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'feed' %}">
+                <i class="fa-solid fa-paw logo-icon"></i>
+                <span class="brand-text-main">Pet</span><span class="brand-text-sub">Pool</span>
+            </a>
+            
+            <div class="ms-auto d-flex align-items-center">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'create_pet' %}" class="btn btn-purple btn-sm me-2">
+                        <i class="fa-solid fa-plus me-1"></i> Add Pet
+                    </a>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm rounded-circle" style="width: 35px; height: 35px; padding: 0; line-height: 33px; text-align: center;">
+                        <i class="fa-solid fa-power-off"></i>
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-purple btn-sm">Login</a>
+                {% endif %}
             </div>
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container py-2">
         {% block content %}{% endblock %}
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

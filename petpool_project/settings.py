@@ -11,8 +11,8 @@ SECRET_KEY = 'django-insecure-u9%b2mca0_)2#!)y^-+)^8yof()p90%oi_n00=&k5vq!ajcusa
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# Allows Render to host your site
-ALLOWED_HOSTS = ['*']
+# UPDATED: Specifically for your PythonAnywhere domain
+ALLOWED_HOSTS = ['frank816.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -82,7 +82,6 @@ USE_I18N = True
 USE_TZ = True
 
 # --- LOGIN FIXES ---
-# This stops the 404 /accounts/login/ errors
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
@@ -90,6 +89,7 @@ LOGOUT_REDIRECT_URL = 'login'
 # Static files (CSS, JavaScript)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Static files storage for Whitenoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files (Uploaded Pet Images)

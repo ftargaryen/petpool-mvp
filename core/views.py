@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from .models import Post, Pet
+from django.db.models import Q
 
 # 1. Registration View
 def register_view(request):
@@ -44,9 +45,10 @@ def create_pet(request):
         return redirect('feed')
     return render(request, 'core/create_pet.html')
 
-# 5. Social Feed & Post Creation
+# 5. Social Feed, Search & Post Creation
 @login_required
 def feed(request):
+    # Handle New Post Creation
     if request.method == 'POST':
         caption = request.POST.get('caption')
         image = request.FILES.get('image')
@@ -54,10 +56,20 @@ def feed(request):
             Post.objects.create(author=request.user, caption=caption, image=image)
             return redirect('feed')
             
-    posts = Post.objects.all().order_by('-created_at')
-    user_pets = Pet.objects.filter(owner=request.user) # Keeps your sidebar working
+    # Handle Search Functionality
+    query = request.GET.get('q')
+    if query:
+        posts = Post.objects.filter(
+            Q(caption__icontains=query) | 
+            Q(author__username__icontains=query)
+        ).order_by('-created_at')
+    else:
+        posts = Post.objects.all().order_by('-created_at')
+        
+    user_pets = Pet.objects.filter(owner=request.user) 
     
     return render(request, 'core/feed.html', {
         'posts': posts,
-        'user_pets': user_pets
+        'user_pets': user_pets,
+        'search_query': query
     })
