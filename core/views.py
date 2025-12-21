@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from .models import Post, Pet
+from django.http import JsonResponse
+from .models import Post, Pet, Comment
 from django.db.models import Q
 
 # 1. Registration View
@@ -34,7 +35,7 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
-# 4. Create Pet View (CRITICAL REQUIREMENT)
+# 4. Create Pet View
 @login_required
 def create_pet(request):
     if request.method == 'POST':
@@ -45,10 +46,9 @@ def create_pet(request):
         return redirect('feed')
     return render(request, 'core/create_pet.html')
 
-# 5. Social Feed, Search & Post Creation
+# 5. Social Feed
 @login_required
 def feed(request):
-    # Handle New Post Creation
     if request.method == 'POST':
         caption = request.POST.get('caption')
         image = request.FILES.get('image')
@@ -56,7 +56,6 @@ def feed(request):
             Post.objects.create(author=request.user, caption=caption, image=image)
             return redirect('feed')
             
-    # Handle Search Functionality
     query = request.GET.get('q')
     if query:
         posts = Post.objects.filter(
@@ -67,9 +66,30 @@ def feed(request):
         posts = Post.objects.all().order_by('-created_at')
         
     user_pets = Pet.objects.filter(owner=request.user) 
-    
     return render(request, 'core/feed.html', {
         'posts': posts,
         'user_pets': user_pets,
         'search_query': query
     })
+
+# 6. AJAX Like View (Instagram Style)
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if post.likes.filter(id=request.user.id).exists():
+        post.likes.remove(request.user)
+        liked = False
+    else:
+        post.likes.add(request.user)
+        liked = True
+    return JsonResponse({'liked': liked, 'count': post.likes.count()})
+
+# 7. Add Comment View
+@login_required
+def add_comment(request, post_id):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, id=post_id)
+        text = request.POST.get('text')
+        if text:
+            Comment.objects.create(user=request.user, post=post, text=text)
+    return redirect('feed')
